@@ -156,6 +156,17 @@ install_brew_package "wkhtmltopdf"
 #install frappe bench
 install_pyton_package "frappe-bench"
 # initilise the frappe bench & install frappe latest version"
-bench init frappe-bench --frappe-branch version-13
+bench init frappe-bench 
 cd frappe-bench/
+
+bench new-site site1.local
+# install npm packages again
+
+bench get-app https://github.com/frappe/erpnext  
+
+bench --site site1.local add-to-hosts
+
 bench start
+
+echo "DISCLAIMER USE IT AT YOUR COST"
+echo "frappe is BS"

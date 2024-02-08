@@ -1,18 +1,17 @@
 {
   "name": "erpnext-installer",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "nahom@techethio tar xzvf script_archive.tar.gz ./extractor.sh",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "get-frappe": "node index.js"
+  "bin": {
+    "create-erpnext-app": "./index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nahomdev/erpnext-installer.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Nahom Balcha",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nahomdev/erpnext-installer/issues"

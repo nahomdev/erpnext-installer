@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+const path = require("path");
 const shell = require("shelljs");
 
-shell.exec("./installer.sh");
+shell.exec(path.join(__dirname, "/installer.sh"));

@@ -1,2 +1,3 @@
 node_modules/
-frappe_bench/
+frappe-bench/
+install_script.log/

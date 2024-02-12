@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
-
  
-LOG_FILE="install_script.log"
-CONFIG_FILE="config.ini"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ 
+LOG_FILE="$SCRIPT_DIR/install_script.log"
+CONFIG_FILE="$SCRIPT_DIR/config.ini"
 
  
 if [ -t 1 ]; then

@@ -1,11 +1,14 @@
 {
   "name": "erpnext-installer",
-  "version": "1.0.3",
+  "version": "1.2.2",
   "description": "nahom@techethio tar xzvf script_archive.tar.gz ./extractor.sh",
   "main": "index.js",
   "bin": {
     "create-erpnext-app": "./index.js"
-  },
+  }, 
+   "scripts": {
+    "dev":"node index.js"
+   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/nahomdev/erpnext-installer.git"

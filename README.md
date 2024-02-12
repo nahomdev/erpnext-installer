@@ -33,4 +33,4 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 
 Happy customization!
 
-Nahom #phoenix #FRAPPEISBS
+Nahom #phoenix

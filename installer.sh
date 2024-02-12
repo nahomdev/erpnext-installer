@@ -1,172 +1,196 @@
 #!/bin/bash
+set -e
 
- # Install Homebrew
-if command -v brew > /dev/null; then
-    echo "Homebrew is already installed."
-else 
-    echo "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
  
-    if [ $? -eq 0 ]; then
-        echo "Homebrew installed successfully."
-    else
-        echo "Error: Homebrew installation failed."
-        exit 1
-    fi
+LOG_FILE="install_script.log"
+CONFIG_FILE="config.ini"
+
+ 
+if [ -t 1 ]; then
+    COLOR_RESET=$(tput sgr0)
+    COLOR_INFO=$(tput setaf 2) 
+    COLOR_ERROR=$(tput setaf 1) 
+else
+    COLOR_RESET=''
+    COLOR_INFO=''
+    COLOR_ERROR=''
 fi
+ 
+log_info() {
+    local message=$1
+    echo -e "${COLOR_INFO}[INFO] $message${COLOR_RESET}"
+    echo "[INFO] $message" >> "$LOG_FILE"
+}
 
-# brew package installer
-install_brew_package() {
+log_error() {
+    local message=$1
+    echo -e "${COLOR_ERROR}[ERROR] $message${COLOR_RESET}"
+    echo "[ERROR] $message" >> "$LOG_FILE"
+}
+ 
+install_or_upgrade_brew_package() {
     local package_name=$1
- 
-    if command -v $package_name > /dev/null; then
-        echo "$package_name is already installed."
+
+    if command -v "$package_name" > /dev/null; then
+        log_info "$package_name is already installed."
     else 
-        echo "Installing $package_name..."
-        brew install $package_name
- 
-        if [ $? -eq 0 ]; then
-            echo "$package_name installed successfully."
+        if brew list -1 | grep -q "^$package_name\$"; then
+            log_info "Upgrading $package_name..."
+            brew upgrade "$package_name"
         else
-            echo "Error: $package_name installation failed."
+            log_info "Installing $package_name..."
+            brew install "$package_name"
+        fi
+
+        if [ $? -eq 0 ]; then
+            log_info "$package_name installed/upgraded successfully."
+        else
+            log_error "Error: $package_name installation/upgrade failed."
             exit 1
         fi
     fi
 }
 
-upgrade_brew_package() {
-    local package_name=$1
- 
-    if command -v $package_name > /dev/null; then
-        echo "$package_name is already installed."
-    else 
-        echo "Installing $package_name..."
-        brew upgrade $package_name
- 
-        if [ $? -eq 0 ]; then
-            echo "$package_name installed successfully."
-        else
-            echo "Error: $package_name installation failed."
-            exit 1
-        fi
-    fi
-}
-
-start_service() {
+# start a Homebrew service
+start_brew_service() {
     local service_name=$1
 
-    # Start the service
-    echo "Starting $service_name service..."
-    brew services start $service_name
+    log_info "Starting $service_name service..."
+    brew services start "$service_name"
 }
 
-#pyton package installer
-install_pyton_package() {
+# install a Python package using pip3
+install_python_package() {
     local package_name=$1
 
-    if command -v $package_name > /dev/null; then
-        echo "$package_name is already installed."
+    if command -v "$package_name" > /dev/null; then
+        log_info "$package_name is already installed."
     else
-        echo "Installing $package_name..."
-        pip3 install $package_name
-      if [ $? -eq 0 ]; then
-            echo "$package_name installed successfully."
+        log_info "Installing $package_name..."
+        pip3 install "$package_name"
+
+        if [ $? -eq 0 ]; then
+            log_info "$package_name installed successfully."
         else
-            echo "Error: $package_name installation failed."
+            log_error "Error: $package_name installation failed."
             exit 1
         fi
     fi
 }
 
+# install an npm package globally
 install_npm_package() {
     local package_name=$1
 
     if command -v npm > /dev/null; then
-        echo "Installing $package_name using npm..."
-        npm install -g $package_name
+        log_info "Installing $package_name using npm..."
+        npm install -g "$package_name"
 
-    # Check if the installation was successful
+      
         if [ $? -eq 0 ]; then
-            echo "$package_name installed successfully."
+            log_info "$package_name installed successfully."
         else
-            echo "Error: $package_name installation failed."
+            log_error "Error: $package_name installation failed."
             exit 1
         fi
     else
-        echo "Error: npm is not installed. Please install npm and try again."
+        log_error "Error: npm is not installed. Please install npm and try again."
         exit 1
     fi
 }
 
+# update a configuration file
 update_config_file() {
     local file_path=$1
     local content=$2
-
-    # Check if the content is already in the file
+ 
     if grep -q "$content" "$file_path"; then
-        echo "Configuration already exists in $file_path."
-    else
-        # Add the content to the file
+        log_info "Configuration already exists in $file_path."
+    else 
         echo -e "$content" >> "$file_path"
-        echo "Configuration added to $file_path."
+        log_info "Configuration added to $file_path."
     fi
 }
 
-# Install Packages
-install_brew_package "git" 
-install_brew_package "python3"
+# prompt user for Frappe Bench location
+prompt_frappe_bench_location() {
+    read -p "Enter the path where you want to initialize Frappe Bench: " frappe_bench_location
+ 
+    if [ ! -d "$frappe_bench_location" ]; then
+        log_error "Error: The specified path does not exist or is not a directory."
+        exit 1
+    fi
 
-# Install Python packages
-install_pyton_package "setuptools"
-install_pyton_package "virtualenv"
+    log_info "Frappe Bench will be initialized at: $frappe_bench_location"
+}
 
-# Install mariadb
-install_brew_package "mariadb"
-# Upgrade mariadb
-upgrade_brew_package "mariadb"
-mysql_install_db #database installer
-mysql.server start #start mariadb server
-mysql_secure_installation #start secure installer
+# load configurations from a file
+load_configurations() {
+    if [ -f "$CONFIG_FILE" ]; then
+        source "$CONFIG_FILE"
+    else
+        log_error "Error: Configuration file $CONFIG_FILE not found."
+        exit 1
+    fi
+}
+ 
+load_configurations
 
-# Install mysql-client
-install_brew_package "mysql-client"
+ 
+install_or_upgrade_brew_package "$GIT_PACKAGE"
+install_or_upgrade_brew_package "$PYTHON3_PACKAGE"
+ 
+install_python_package "setuptools"
+install_python_package "virtualenv"
 
-#Edit the mariadb configuration
-config_content="[mysqld]
-character-set-client-handshake = FALSE
-character-set-server = utf8mb4
-collation-server = utf8mb4_unicode_ci
+ 
+install_or_upgrade_brew_package "$MARIADB_PACKAGE"
+start_brew_service "mariadb"
+ 
+install_or_upgrade_brew_package "mariadb"
 
-[mysql]
-default-character-set = utf8mb4"
-update_config_file "/opt/homebrew/etc/mariadb/my.cnf" "$config_content"
+ 
+mysql_install_db
 
-# Start mariadb server
-start_service "mariadb"
+ 
+mysql.server start
 
-# install redis and node
-install_brew_package "redis"
-install_brew_package "node"
+ 
+mysql_secure_installation
 
-#install yarn using npm
-install_npm_package "yarn"
+ 
+install_or_upgrade_brew_package "$MYSQL_CLIENT_PACKAGE"
 
-install_brew_package "wkhtmltopdf"
+ 
+update_config_file "/opt/homebrew/etc/my.cnf" "$MARIADB_CONFIG_CONTENT" 
 
-#install frappe bench
-install_pyton_package "frappe-bench"
-# initilise the frappe bench & install frappe latest version"
+ 
+install_or_upgrade_brew_package "$REDIS_PACKAGE"
+install_or_upgrade_brew_package "$NODE_PACKAGE"
+
+ 
+install_npm_package "$YARN_PACKAGE"
+
+ 
+install_or_upgrade_brew_package "$WKHTMLTOPDF_PACKAGE"
+
+ 
+prompt_frappe_bench_location
+
+ 
+install_python_package "frappe-bench"
+ 
+cd "$frappe_bench_location"
 bench init frappe-bench 
-cd frappe-bench/
+
+cd frappe-bench
 
 bench new-site site1.local
-# install npm packages again
-
-bench get-app https://github.com/frappe/erpnext  
+ 
+bench get-app https://github.com/frappe/erpnext
 
 bench --site site1.local add-to-hosts
 
 bench start
 
-echo "DISCLAIMER USE IT AT YOUR COST"
-echo "frappe is BS"
+log_info "..... happy coding! ..." 

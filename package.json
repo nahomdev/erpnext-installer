@@ -1,6 +1,6 @@
 {
   "name": "erpnext-installer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "nahom@techethio tar xzvf script_archive.tar.gz ./extractor.sh",
   "main": "index.js",
   "bin": {

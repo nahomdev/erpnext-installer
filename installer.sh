@@ -29,6 +29,7 @@ log_error() {
     echo "[ERROR] $message" >> "$LOG_FILE"
 }
  
+ # install or upgrade brew package
 install_or_upgrade_brew_package() {
     local package_name=$1
 
@@ -37,10 +38,10 @@ install_or_upgrade_brew_package() {
     else 
         if brew list -1 | grep -q "^$package_name\$"; then
             log_info "Upgrading $package_name..."
-            brew upgrade "$package_name"
+            sudo brew upgrade "$package_name"
         else
             log_info "Installing $package_name..."
-            brew install "$package_name"
+            sudo brew install "$package_name"
         fi
 
         if [ $? -eq 0 ]; then
@@ -57,7 +58,7 @@ start_brew_service() {
     local service_name=$1
 
     log_info "Starting $service_name service..."
-    brew services start "$service_name"
+    sudo brew services start "$service_name"
 }
 
 # install a Python package using pip3
@@ -68,7 +69,7 @@ install_python_package() {
         log_info "$package_name is already installed."
     else
         log_info "Installing $package_name..."
-        pip3 install "$package_name"
+        sudo pip3 install "$package_name"
 
         if [ $? -eq 0 ]; then
             log_info "$package_name installed successfully."
@@ -85,9 +86,14 @@ install_npm_package() {
 
     if command -v npm > /dev/null; then
         log_info "Installing $package_name using npm..."
-        npm install -g "$package_name"
 
-      
+        if command -v $package_name > /dev/null; then
+            echo "we need sudo permissions to install $package_name"
+            sudo npm install -g "$package_name"
+        else
+            log_info "$package_name is already installed"
+        fi
+
         if [ $? -eq 0 ]; then
             log_info "$package_name installed successfully."
         else

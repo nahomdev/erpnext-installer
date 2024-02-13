@@ -20,13 +20,13 @@ fi
 log_info() {
     local message=$1
     echo -e "${COLOR_INFO}[INFO] $message${COLOR_RESET}"
-    echo "[INFO] $message" >> "$LOG_FILE"
+    echo "[INFO] $message" | sudo tee -a "$LOG_FILE" > /dev/null
 }
 
 log_error() {
     local message=$1
     echo -e "${COLOR_ERROR}[ERROR] $message${COLOR_RESET}"
-    echo "[ERROR] $message" >> "$LOG_FILE"
+    echo "[ERROR] $message" | sudo tee -a "$LOG_FILE" > /dev/null
 }
  
  # install or upgrade brew package
@@ -36,13 +36,13 @@ install_or_upgrade_brew_package() {
     if command -v "$package_name" > /dev/null; then
         log_info "$package_name is already installed."
     else 
-        if brew list -1 | grep -q "^$package_name\$"; then
-            log_info "Upgrading $package_name..."
-            sudo brew upgrade "$package_name"
-        else
-            log_info "Installing $package_name..."
-            sudo brew install "$package_name"
-        fi
+        # if brew list -1 | grep -q "^$package_name\$"; then
+        #     log_info "Upgrading $package_name..."
+        #     arch -arm64 brew upgrade "$package_name"
+        # else
+        log_info "Installing $package_name..."
+        arch -arm64 brew install "$package_name"
+        # fi
 
         if [ $? -eq 0 ]; then
             log_info "$package_name installed/upgraded successfully."
@@ -58,7 +58,7 @@ start_brew_service() {
     local service_name=$1
 
     log_info "Starting $service_name service..."
-    sudo brew services start "$service_name"
+    brew services start "$service_name"
 }
 
 # install a Python package using pip3
@@ -69,7 +69,7 @@ install_python_package() {
         log_info "$package_name is already installed."
     else
         log_info "Installing $package_name..."
-        sudo pip3 install "$package_name"
+        pip3 install "$package_name"
 
         if [ $? -eq 0 ]; then
             log_info "$package_name installed successfully."

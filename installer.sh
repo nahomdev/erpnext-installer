@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
- 
+
+BOLD=$(tput bold)
+BLUE=$(tput setaf 4)
+echo -e "${BLUE}${BOLD}***** some of the commands may require sudo permissions! *****"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
  
 LOG_FILE="$SCRIPT_DIR/install_script.log"
@@ -36,13 +39,13 @@ install_or_upgrade_brew_package() {
     if command -v "$package_name" > /dev/null; then
         log_info "$package_name is already installed."
     else 
-        # if brew list -1 | grep -q "^$package_name\$"; then
-        #     log_info "Upgrading $package_name..."
-        #     arch -arm64 brew upgrade "$package_name"
-        # else
+        if brew list -1 | grep -q "^$package_name\$"; then
+            log_info "Upgrading $package_name..."
+            arch -arm64 brew upgrade "$package_name"
+        else
         log_info "Installing $package_name..."
         arch -arm64 brew install "$package_name"
-        # fi
+        fi
 
         if [ $? -eq 0 ]; then
             log_info "$package_name installed/upgraded successfully."

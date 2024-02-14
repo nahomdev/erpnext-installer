@@ -3,7 +3,7 @@ const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 
-const scriptPath = path.join(__dirname, "installer.sh");
+const scriptPath = path.join(__dirname, "entry.sh");
 
 const child = spawn("bash", [scriptPath], { stdio: "inherit" });
 

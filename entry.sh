@@ -23,9 +23,11 @@ echo "2. ${GREEN}${BOLD}Linux${NORMAL} ( Ubuntu 22.04 )"
 read -p "Enter your choice (1 or 2): " choice
 
 if [ "$choice" == "1" ]; then
+    chmod +x "$MAC_INTSTALLER"
     "$MAC_INTSTALLER"
 elif [ "$choice" == "2" ]; then
     # echo -e "${RED}${BOLD}Linux installer: Coming soon...${NORMAL}"
+    chmod +x "$LINUX_INSTALLER"
     "$LINUX_INSTALLER"
 else
     echo -e "${RED}${BOLD}Invalid choice. Exiting...${NORMAL}"
